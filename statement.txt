@@ -1,6 +1,6 @@
 The Federal Reserve is committed to using its full range of tools to support the U.S. economy in this challenging time, thereby promoting its maximum employment and price stability goals.
 
-The COVID-19 pandemic is causing tremendous human and economic hardship across the United States and around the world. The pace of the recovery in economic activity and employment has moderated in recent months, with weakness concentrated in the sectors most adversely affected by the pandemic. Weaker demand and earlier declines in oil prices have been holding down consumer price inflation. Overall financial conditions remain accommodative, in part reflecting policy measures to support the economy and the flow of credit to U.S. households and businesses.
+The COVID-19 pandemic is causing tremendous human and economic hardship across the United States and around the world. Following a moderation in the pace of the recovery, indicators of economic activity and employment have turned up recently, although the sectors most adversely affected by the pandemic remain weak. Inflation continues to run below 2 percent. Overall financial conditions remain accommodative, in part reflecting policy measures to support the economy and the flow of credit to U.S. households and businesses.
 
 The path of the economy will depend significantly on the course of the virus, including progress on vaccinations. The ongoing public health crisis continues to weigh on economic activity, employment, and inflation, and poses considerable risks to the economic outlook.
 
@@ -10,4 +10,4 @@ In assessing the appropriate stance of monetary policy, the Committee will conti
 
 Voting for the monetary policy action were Jerome H. Powell, Chair; John C. Williams, Vice Chair; Thomas I. Barkin; Raphael W. Bostic; Michelle W. Bowman; Lael Brainard; Richard H. Clarida; Mary C. Daly; Charles L. Evans; Randal K. Quarles; and Christopher J. Waller.
 
-Implementation Note issued January 27, 2021
+Implementation Note issued March 17, 2021
