@@ -1,6 +1,6 @@
 The Federal Reserve is committed to using its full range of tools to support the U.S. economy in this challenging time, thereby promoting its maximum employment and price stability goals.
 
-The COVID-19 pandemic is causing tremendous human and economic hardship across the United States and around the world. Economic activity and employment have picked up in recent months but remain well below their levels at the beginning of the year. Weaker demand and significantly lower oil prices are holding down consumer price inflation. Overall financial conditions have improved in recent months, in part reflecting policy measures to support the economy and the flow of credit to U.S. households and businesses.
+The COVID-19 pandemic is causing tremendous human and economic hardship across the United States and around the world. Economic activity and employment have continued to recover but remain well below their levels at the beginning of the year. Weaker demand and earlier declines in oil prices have been holding down consumer price inflation. Overall financial conditions remain accommodative, in part reflecting policy measures to support the economy and the flow of credit to U.S. households and businesses.
 
 The path of the economy will depend significantly on the course of the virus. The ongoing public health crisis will continue to weigh on economic activity, employment, and inflation in the near term, and poses considerable risks to the economic outlook over the medium term.
 
@@ -8,8 +8,6 @@ The Committee seeks to achieve maximum employment and inflation at the rate of 2
 
 In assessing the appropriate stance of monetary policy, the Committee will continue to monitor the implications of incoming information for the economic outlook. The Committee would be prepared to adjust the stance of monetary policy as appropriate if risks emerge that could impede the attainment of the Committee's goals. The Committee's assessments will take into account a wide range of information, including readings on public health, labor market conditions, inflation pressures and inflation expectations, and financial and international developments.
 
-Voting for the monetary policy action were Jerome H. Powell, Chair; John C. Williams, Vice Chair; Michelle W. Bowman; Lael Brainard; Richard H. Clarida; Patrick Harker; Loretta J. Mester; and Randal K. Quarles.
+Voting for the monetary policy action were Jerome H. Powell, Chair; John C. Williams, Vice Chair; Michelle W. Bowman; Lael Brainard; Richard H. Clarida; Mary C. Daly; Patrick Harker; Robert S. Kaplan; Loretta J. Mester; and Randal K. Quarles. Ms. Daly voted as an alternate member at this meeting.
 
-Voting against the action were Robert S. Kaplan, who expects that it will be appropriate to maintain the current target range until the Committee is confident that the economy has weathered recent events and is on track to achieve its maximum employment and price stability goals as articulated in its new policy strategy statement, but prefers that the Committee retain greater policy rate flexibility beyond that point; and Neel Kashkari, who prefers that the Committee indicate that it expects to maintain the current target range until core inflation has reached 2 percent on a sustained basis.
-
-Implementation Note issued September 16, 2020
+Implementation Note issued November 5, 2020
