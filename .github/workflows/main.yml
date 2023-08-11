@@ -3,10 +3,10 @@
 name: Scrape latest statement
 
 on:
-#   push:
+  push:
   workflow_dispatch:
-#   schedule:
-#   - cron: '1 18,19,20 * * *'
+  schedule:
+  - cron: '1 18,19,20 * * *'
 
 jobs:
   scheduled:
