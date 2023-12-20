@@ -13,7 +13,7 @@ The updated dataset is located in this repository at [`communications.csv`](http
 - `Date` - Date of the FOMC meeting.
 - `Release Date` - Release date of the statement/minutes. Note that minutes are usually released with a ~3 week lag from the meeting date.
 - `Type` - Communication type, either a statement or minutes.
-- `Text` - The text content of each communication releas
+- `Text` - The text content of each communication release.
 
 ### Availability
 This dataset is also available on [Kaggle](https://www.kaggle.com/datasets/vladtasca/fomc-meeting-statements-and-minutes), together with related Jupyter notebooks.
