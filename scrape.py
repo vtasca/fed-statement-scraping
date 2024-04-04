@@ -114,25 +114,27 @@ for panel in panels:
                         }
                     )
 
-# Armed with new data, overwrite the existing .csv
 new_comms_df = pd.DataFrame(new_comms)
 
-communications = pd.read_csv("communications.csv")
-
-communications = (
-    pd.concat([new_comms_df, communications])
-    .assign(Date=lambda df: pd.to_datetime(df["Date"]))
-    .assign(ReleaseDate=lambda df: pd.to_datetime(df["Release Date"], format="mixed"))
-    .drop(columns=["Release Date"])
-    .rename(columns={"ReleaseDate": "Release Date"})
-    .sort_values("Date", ascending=False)
-    .drop_duplicates()
-    .reset_index(drop=True)[["Date", "Release Date", "Type", "Text"]]
-)
-
-communications.to_csv("communications.csv", index=False)
-
-# And overwrite most recent communication date
+# Armed with new data, overwrite the existing .csv
 if new_comms_df.empty == False:
+    communications = pd.read_csv("communications.csv")
+
+    communications = (
+        pd.concat([new_comms_df, communications])
+        .assign(Date=lambda df: pd.to_datetime(df["Date"]))
+        .assign(
+            ReleaseDate=lambda df: pd.to_datetime(df["Release Date"], format="mixed")
+        )
+        .drop(columns=["Release Date"])
+        .rename(columns={"ReleaseDate": "Release Date"})
+        .sort_values("Date", ascending=False)
+        .drop_duplicates()
+        .reset_index(drop=True)[["Date", "Release Date", "Type", "Text"]]
+    )
+
+    communications.to_csv("communications.csv", index=False)
+
+    # And overwrite most recent communication date
     with open("most-recent-communication-date.txt", "w", encoding="utf-8") as f:
         f.write(new_comms_df["Release Date"].max())
