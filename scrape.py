@@ -139,34 +139,79 @@ def process_meeting_row(row, meeting_timestamp, most_recent_date, new_comms):
                 )
 
 
-def update_communications(new_comms):
+def update_communications(new_comms, meeting_dates):
     new_comms_df = pd.DataFrame(new_comms)
-
-    # Armed with new data, overwrite the existing .csv
-    if not new_comms_df.empty:
+    
+    try:
+        # Read existing data with flexible datetime parsing
         communications = pd.read_csv("communications.csv")
+        communications['Date'] = pd.to_datetime(
+            communications['Date'], format='mixed'
+        ).dt.date
+        communications['Release Date'] = pd.to_datetime(
+            communications['Release Date'], format='mixed'
+        ).dt.date
+    except FileNotFoundError:
+        communications = pd.DataFrame(columns=["Date", "Release Date", "Type", "Text"])
 
-        communications = (
-            pd.concat([new_comms_df, communications])
-            .assign(Date=lambda df: pd.to_datetime(df["Date"]))
-            .assign(
-                ReleaseDate=lambda df: pd.to_datetime(
-                    df["Release Date"], format="mixed"
-                )
-            )
-            .drop(columns=["Release Date"])
-            .rename(columns={"ReleaseDate": "Release Date"})
-            .sort_values("Date", ascending=False)
-            .drop_duplicates()
-            .reset_index(drop=True)[["Date", "Release Date", "Type", "Text"]]
-        )
+    # Process new communications
+    if not new_comms_df.empty:
+        # Convert new data using known format
+        new_comms_df['Date'] = pd.to_datetime(
+            new_comms_df['Date'], format='%Y-%m-%d'
+        ).dt.date
+        new_comms_df['Release Date'] = pd.to_datetime(
+            new_comms_df['Release Date'], format='%Y-%m-%d'
+        ).dt.date
+        communications = pd.concat([new_comms_df, communications], ignore_index=True)
 
-        communications.to_csv("communications.csv", index=False)
+    # Process meeting dates
+    meeting_dates_df = pd.DataFrame([{"Date": d["Date"]} for d in meeting_dates])
+    meeting_dates_df['Date'] = pd.to_datetime(meeting_dates_df['Date']).dt.date
+    meeting_dates_df['Release Date'] = meeting_dates_df['Date']
+    meeting_dates_df['Type'] = "Scheduled Meeting"
+    meeting_dates_df['Text'] = ""
 
-        # And overwrite most recent communication date
+    # Merge and clean data
+    combined = pd.concat([communications, meeting_dates_df])
+    
+    # After merging but before deduplication
+    # Create mask to remove scheduled meetings when real data exists
+    has_real_data = combined['Type'].isin(['Statement', 'Minute'])
+    scheduled_mask = (combined['Type'] == 'Scheduled Meeting') & \
+                     combined['Date'].isin(combined.loc[has_real_data, 'Date'])
+    
+    # Keep only relevant rows
+    combined = combined[~scheduled_mask]
+    
+    # Then proceed with existing deduplication
+    combined = combined.drop_duplicates(
+        subset=["Date", "Type"], 
+        keep='first'
+    )
+    
+    # Sort and save
+    combined.sort_values("Date", ascending=False) \
+            .to_csv("communications.csv", index=False)
+
+    # Update most recent date if new comms exist
+    if not new_comms_df.empty:
         write_most_recent_date(
-            "most-recent-communication-date.txt", new_comms_df["Release Date"].max()
+            "most-recent-communication-date.txt", 
+            new_comms_df["Release Date"].max().strftime('%Y-%m-%d')
         )
+
+
+def scrape_meeting_dates(panels):
+    meeting_dates = []
+    for panel in panels:
+        year = extract_year_from_panel(panel)
+        for row in panel.select('div[class*="row fomc-meeting"]'):
+            meeting_timestamp = assemble_meeting_timestamp(row, year)
+            meeting_dates.append({
+                "Date": format_date(meeting_timestamp)
+            })
+    return meeting_dates
 
 
 def main():
@@ -175,8 +220,8 @@ def main():
     if html_content:
         panels = parse_fomc_page(html_content)
         new_comms = scrape_communications(panels, most_recent_date)
-        if new_comms:
-            update_communications(new_comms)
+        meeting_dates = scrape_meeting_dates(panels)
+        update_communications(new_comms, meeting_dates)
 
 
 if __name__ == "__main__":
