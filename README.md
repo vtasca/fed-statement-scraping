@@ -1,7 +1,7 @@
 # FOMC Meeting Statements & Minutes
-This repository automatically scrapes and aggregates the Federal Reserve FOMC meeting statements and minutes - creating a dataset that enables tracking US monetary policy changes through time.
+This repository automatically scrapes and aggregates the Federal Reserve FOMC meeting statements, minutes, and scheduled future meetings - creating a dataset that enables tracking US monetary policy changes through time.
 
-It works by polling the website of the U.S. Federal Reserve on a periodic basis and scraping the new statements and minutes as they become available. 
+It works by polling the website of the U.S. Federal Reserve on a periodic basis and scraping the new statements, minutes, and scheduled meetings as they become available. 
 The scraper runs in a scheduled GitHub Actions workflow, which is [available here](https://github.com/vtasca/fed-statement-scraping/actions/workflows/main.yml).
 
 The dataset begins in the year 2000 and the textual data is presented as it is found on the website of the Federal Reserve.
@@ -12,8 +12,19 @@ The updated dataset is located in this repository at [`communications.csv`](http
 ### Data description
 - `Date` - Date of the FOMC meeting.
 - `Release Date` - Release date of the statement/minutes. Note that minutes are usually released with a ~3 week lag from the meeting date.
-- `Type` - Communication type, either a statement or minutes.
-- `Text` - The text content of each communication release.
+- `Type` - Communication type, one of:
+  - `Statement` - FOMC meeting statement
+  - `Minute` - Detailed minutes of the meeting
+  - `Scheduled Meeting` - Future scheduled meeting date
+- `Text` - The text content of each communication release (empty for scheduled meetings).
+
+### Meeting Types
+The dataset includes three types of entries:
+1. **Statements** - Released on the day of the meeting, containing the FOMC's decisions and economic outlook
+2. **Minutes** - Detailed record of the meeting discussion, released approximately three weeks after the meeting
+3. **Scheduled Meetings** - Future meeting dates announced by the Fed
+
+Note: When a meeting date has an associated statement or minutes, the "Scheduled Meeting" entry is automatically removed to avoid duplication.
 
 ### Availability
 This dataset is also available on [Kaggle](https://www.kaggle.com/datasets/vladtasca/fomc-meeting-statements-and-minutes), together with related Jupyter notebooks.
