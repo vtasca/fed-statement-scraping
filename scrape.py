@@ -1,4 +1,5 @@
 import re
+import csv
 
 import pandas as pd
 import requests
@@ -170,7 +171,7 @@ def update_communications(new_comms, meeting_dates):
     meeting_dates_df['Date'] = pd.to_datetime(meeting_dates_df['Date']).dt.date
     meeting_dates_df['Release Date'] = meeting_dates_df['Date']
     meeting_dates_df['Type'] = "Scheduled Meeting"
-    meeting_dates_df['Text'] = ""
+    meeting_dates_df['Text'] = None
 
     # Merge and clean data
     combined = pd.concat([communications, meeting_dates_df])
@@ -189,6 +190,9 @@ def update_communications(new_comms, meeting_dates):
         subset=["Date", "Type"], 
         keep='first'
     )
+    
+    # Before saving, fill NaN/None with empty strings
+    combined['Text'] = combined['Text'].fillna("None")
     
     # Sort and save
     combined.sort_values("Date", ascending=False) \
