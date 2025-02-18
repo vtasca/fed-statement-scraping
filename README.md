@@ -18,6 +18,9 @@ The updated dataset is located in this repository at [`communications.csv`](http
 ### Availability
 This dataset is also available on [Kaggle](https://www.kaggle.com/datasets/vladtasca/fomc-meeting-statements-and-minutes), together with related Jupyter notebooks.
 
+### Future meetings
+The full calendar of FOMC meetings is available on the [Federal Reserve website](https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm), from where future meeting dates can be extracted.
+
 ## Related research
 Monetary policy decisions shown in the FOMC meeting statements have been analyzed at length in academic research and found to have immediate effects on the volatility and direction of equity index prices[^1] and interest rates[^2].
 [^1]: Rosa, C. (2011). Words that shake traders: The stock market's reaction to central bank communication in real time. Journal of Empirical Finance, 18(5), 915-934.
