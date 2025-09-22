@@ -35,7 +35,7 @@ jobs:
         git push
     - name: Push data to Hugging Face
       run: |-
-        pip install huggingface_hub
+        git lfs install
         mkdir -p hf_repo
         cp communications.csv hf_repo/
         cd hf_repo
