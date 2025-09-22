@@ -29,41 +29,33 @@ jobs:
     - name: Fetch latest data
       run: python scrape.py
 
-    # Commit changes to GitHub repo
     - name: Commit and push if changed
       run: |-
-        git config user.name "Automated"
-        git config user.email "actions@users.noreply.github.com"
+        git config --global user.name "Automated"
+        git config --global user.email "actions@users.noreply.github.com"
         git add -A
-        timestamp=$(date -u)
-        git commit -m "Latest data: ${timestamp}" || echo "No changes to commit"
+        git commit -m "Latest data: $(date -u)" || echo "No changes to commit"
         git push
 
-    # Install Git LFS
     - name: Install Git LFS
-      run: |
+      run: |-
         sudo apt-get update
         sudo apt-get install -y git-lfs
         git lfs install
 
-    # Push CSV to Hugging Face (preserve history)
     - name: Push data to Hugging Face
       if: ${{ env.HF_TOKEN != '' }}
-      run: |
-        # Clone HF dataset repo
+      run: |-
         git clone https://user:${HF_TOKEN}@huggingface.co/datasets/vtasca/fomc-statements-minutes hf_repo
         cd hf_repo
 
-        # Track CSV with LFS (only needed first time)
         git lfs track "communications.csv"
         git add .gitattributes || true
 
-        # Copy new CSV and commit
         cp ../communications.csv .
         git add communications.csv
         git commit -m "Update data: $(date -u)" || echo "No changes to commit"
 
-        # Push to HF
         git push origin main
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
