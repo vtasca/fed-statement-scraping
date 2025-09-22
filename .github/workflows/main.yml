@@ -1,12 +1,10 @@
-# inspired by https://github.com/simonw/ca-fires-history/blob/main/.github/workflows/scrape.yml
-
-name: Scrape latest statement
+name: Scrape and Publish Latest Statement
 
 on:
   push:
   workflow_dispatch:
   schedule:
-  - cron: '0 8 * * 1'
+    - cron: '0 8 * * 1'  # every Monday 8:00 UTC
 
 permissions:
   contents: write
@@ -14,39 +12,58 @@ permissions:
 jobs:
   scheduled:
     runs-on: ubuntu-latest
+
     steps:
     - name: Check out this repo
       uses: actions/checkout@v3
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.9'
-        cache: 'pip' # caching pip dependencies
-    - run: pip install -r requirements.txt
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
     - name: Fetch latest data
       run: python scrape.py
-    - name: Commit and push if it changed
+
+    # Commit changes to GitHub repo
+    - name: Commit and push if changed
       run: |-
         git config user.name "Automated"
         git config user.email "actions@users.noreply.github.com"
         git add -A
         timestamp=$(date -u)
-        git commit -m "Latest data: ${timestamp}" || exit 0
+        git commit -m "Latest data: ${timestamp}" || echo "No changes to commit"
         git push
-    - name: Push data to Hugging Face
-      run: |-
+
+    # Install Git LFS
+    - name: Install Git LFS
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git-lfs
         git lfs install
-        mkdir -p hf_repo
-        cp communications.csv hf_repo/
+
+    # Push CSV to Hugging Face (preserve history)
+    - name: Push data to Hugging Face
+      if: ${{ secrets.HF_TOKEN != '' }}
+      run: |
+        # Clone HF dataset repo
+        git clone https://user:${HF_TOKEN}@huggingface.co/datasets/vtasca/fomc-statements-minutes hf_repo
         cd hf_repo
-        git init
-        git config user.name "Automated (GitHub)"
-        git config user.email "actions@users.noreply.github.com"
+
+        # Track CSV with LFS (only needed first time)
         git lfs track "communications.csv"
-        git add .gitattributes communications.csv
-        git commit -m "Update data: $(date -u)"
-        git branch -M main
-        git remote add origin https://user:$HF_TOKEN@huggingface.co/datasets/vtasca/fomc-statements-minutes
-        git push origin main --force
+        git add .gitattributes || true
+
+        # Copy new CSV and commit
+        cp ../communications.csv .
+        git add communications.csv
+        git commit -m "Update data: $(date -u)" || echo "No changes to commit"
+
+        # Push to HF
+        git push origin main
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
