@@ -34,7 +34,6 @@ jobs:
         git commit -m "Latest data: ${timestamp}" || exit 0
         git push
     - name: Push data to Hugging Face
-      if: ${{ secrets.HF_TOKEN != '' }}
       run: |-
         pip install huggingface_hub
         mkdir -p hf_repo
