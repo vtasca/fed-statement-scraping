@@ -54,7 +54,7 @@ jobs:
 
         cp ../communications.csv .
         git add communications.csv
-        git commit -m "Update data: $(date -u)" || echo "No changes to commit"
+        git commit -m "Latest data: $(date -u)" || echo 0
 
         git push origin main
       env:
