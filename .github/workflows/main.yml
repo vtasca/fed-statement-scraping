@@ -33,3 +33,11 @@ jobs:
         timestamp=$(date -u)
         git commit -m "Latest data: ${timestamp}" || exit 0
         git push
+    - name: Sync with Hugging Face
+      uses: nateraw/huggingface-sync-action@v0.0.4
+      with:
+        github_repo_id: vtasca/fed-statement-scraping
+        huggingface_repo_id: vtasca/fomc-statements-minutes
+        repo_type: dataset
+        hf_token: ${{ secrets.HF_TOKEN }}
+        subdirectory: communications.csv
