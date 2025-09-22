@@ -48,7 +48,7 @@ jobs:
 
     # Push CSV to Hugging Face (preserve history)
     - name: Push data to Hugging Face
-      if: ${{ secrets.HF_TOKEN != '' }}
+      if: ${{ env.HF_TOKEN != '' }}
       run: |
         # Clone HF dataset repo
         git clone https://user:${HF_TOKEN}@huggingface.co/datasets/vtasca/fomc-statements-minutes hf_repo
