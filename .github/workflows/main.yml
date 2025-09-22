@@ -40,9 +40,10 @@ jobs:
         cp communications.csv hf_repo/
         cd hf_repo
         git init
-        git config user.name "github-actions[bot]"
+        git config user.name "Automated (GitHub)"
         git config user.email "actions@users.noreply.github.com"
-        git add communications.csv
+        git lfs track "communications.csv"
+        git add .gitattributes communications.csv
         git commit -m "Update data: $(date -u)"
         git branch -M main
         git remote add origin https://user:$HF_TOKEN@huggingface.co/datasets/vtasca/fomc-statements-minutes
