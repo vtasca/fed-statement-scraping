@@ -33,11 +33,20 @@ jobs:
         timestamp=$(date -u)
         git commit -m "Latest data: ${timestamp}" || exit 0
         git push
-    - name: Sync with Hugging Face
-      uses: nateraw/huggingface-sync-action@v0.0.4
-      with:
-        github_repo_id: vtasca/fed-statement-scraping
-        huggingface_repo_id: vtasca/fomc-statements-minutes
-        repo_type: dataset
-        hf_token: ${{ secrets.HF_TOKEN }}
-        subdirectory: communications.csv
+    - name: Push data to Hugging Face
+      if: secrets.HF_TOKEN != ''
+      run: |-
+        pip install huggingface_hub
+        mkdir -p hf_repo
+        cp communications.csv hf_repo/
+        cd hf_repo
+        git init
+        git config user.name "github-actions[bot]"
+        git config user.email "actions@users.noreply.github.com"
+        git add communications.csv
+        git commit -m "Update data: $(date -u)"
+        git branch -M main
+        git remote add origin https://user:$HF_TOKEN@huggingface.co/datasets/vtasca/fomc-statements-minutes
+        git push origin main --force
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
