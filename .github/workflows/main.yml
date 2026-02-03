@@ -4,7 +4,11 @@ on:
   push:
   workflow_dispatch:
   schedule:
-    - cron: '0 8 * * 1'  # every Monday 8:00 UTC
+    - cron: '0 8 * * *'  # daily 8:00 UTC
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -15,21 +19,42 @@ jobs:
 
     steps:
     - name: Check out this repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+
+    - name: Check if today is a scrape day (T+1 after FOMC release)
+      id: check
+      run: |
+        TODAY=$(date -u +%Y-%m-%d)
+        if grep -q "^${TODAY}$" release_calendar.txt 2>/dev/null; then
+          echo "run_scraper=true" >> $GITHUB_OUTPUT
+          echo "::notice::Today ($TODAY) is a release calendar T+1 day; will run scraper."
+          RUN_LABEL=Yes
+        else
+          echo "run_scraper=false" >> $GITHUB_OUTPUT
+          echo "::notice::Today ($TODAY) is not in release_calendar.txt; skipping scrape."
+          RUN_LABEL=No
+        fi
+        echo "## Scrape decision" >> $GITHUB_STEP_SUMMARY
+        echo "- **Date:** $TODAY" >> $GITHUB_STEP_SUMMARY
+        echo "- **Run scraper:** $RUN_LABEL" >> $GITHUB_STEP_SUMMARY
 
     - name: Set up Python
+      if: steps.check.outputs.run_scraper == 'true'
       uses: actions/setup-python@v5
       with:
         python-version: '3.9'
         cache: 'pip'
 
     - name: Install dependencies
+      if: steps.check.outputs.run_scraper == 'true'
       run: pip install -r requirements.txt
 
     - name: Fetch latest data
+      if: steps.check.outputs.run_scraper == 'true'
       run: python scrape.py
 
     - name: Commit and push if changed
+      if: steps.check.outputs.run_scraper == 'true'
       run: |-
         git config --global user.name "Automated"
         git config --global user.email "actions@users.noreply.github.com"
@@ -38,14 +63,20 @@ jobs:
         git push
 
     - name: Install Git LFS
+      if: steps.check.outputs.run_scraper == 'true'
       run: |-
         sudo apt-get update
         sudo apt-get install -y git-lfs
         git lfs install
 
     - name: Push data to Hugging Face
-      if: ${{ env.HF_TOKEN != '' }}
+      if: steps.check.outputs.run_scraper == 'true'
       run: |-
+        if [ -z "$HF_TOKEN" ]; then
+          echo "::notice::HF_TOKEN not set; skipping Hugging Face push"
+          exit 0
+        fi
+        echo "::add-mask::$HF_TOKEN"
         git clone https://user:${HF_TOKEN}@huggingface.co/datasets/vtasca/fomc-statements-minutes hf_repo
         cd hf_repo
 

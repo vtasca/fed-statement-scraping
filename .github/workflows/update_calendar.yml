@@ -1,0 +1,56 @@
+name: Update Release Calendar
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 1 1,7 *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  update-calendar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Update release calendar
+        run: |
+          echo "::group::Update release calendar"
+          python update_release_calendar.py
+          echo "::endgroup::"
+
+      - name: Commit and push if calendar changed
+        id: commit
+        run: |-
+          git config --global user.name "Automated"
+          git config --global user.email "actions@users.noreply.github.com"
+          git add release_calendar.txt
+          if git diff --staged --quiet; then
+            echo "pushed=false" >> $GITHUB_OUTPUT
+            echo "::notice::No changes to release_calendar.txt"
+          else
+            git commit -m "chore: update release calendar from Fed JSON"
+            git push
+            echo "pushed=true" >> $GITHUB_OUTPUT
+            echo "::notice::Pushed calendar update"
+          fi
+
+      - name: Job summary
+        run: |
+          echo "## Release calendar update" >> $GITHUB_STEP_SUMMARY
+          echo "- **Pushed:** ${{ steps.commit.outputs.pushed == 'true' && 'Yes' || 'No' }}" >> $GITHUB_STEP_SUMMARY
