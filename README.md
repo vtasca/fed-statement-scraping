@@ -7,7 +7,7 @@ The scraper runs in a scheduled GitHub Actions workflow, which is [available her
 The dataset begins in the year 2000 and the textual data is presented as it is found on the website of the Federal Reserve.
 
 ## Usage
-The updated dataset is located in this repository at [`communications.csv`](https://github.com/vtasca/fed-statement-scraping/blob/master/communications.csv). If found, new data is added on a weekly basis on Monday mornings.
+The updated dataset is located in this repository at [`communications.csv`](https://github.com/vtasca/fed-statement-scraping/blob/master/communications.csv). If found, new data is added in the morning of the day after the release.
 
 ### Data description
 - `Date` - Date of the FOMC meeting.
