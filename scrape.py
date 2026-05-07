@@ -38,7 +38,7 @@ def write_most_recent_date(file_path, date):
 
 
 def fetch_page(url, headers):
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, timeout=30)
     if response.ok:
         return response.text
     return None
@@ -94,49 +94,53 @@ def process_meeting_row(row, meeting_timestamp, most_recent_date, new_comms):
     statement_div = row.find(tag_has_statement)
     if statement_div and meeting_timestamp > most_recent_date:
         all_statement_links = statement_div.find_all("a")
-        if all_statement_links:
-            html_statement_link = [
-                link for link in all_statement_links if link.text == "HTML"
-            ][0]
+        html_statement_link = next(
+            (link for link in all_statement_links if link.text == "HTML"), None
+        )
+        if html_statement_link:
             statement_url = BASE_URL + html_statement_link.get("href")
             statement_page = fetch_page(statement_url, HEADERS)
-            communication = parse_communication_page(statement_page, "Statement")
-            # Now scrape that link
-            new_comms.append(
-                {
-                    "Date": format_date(meeting_timestamp),
-                    "Release Date": format_date(meeting_timestamp),
-                    "Type": "Statement",
-                    "Text": communication,
-                }
-            )
+            if statement_page:
+                communication = parse_communication_page(statement_page, "Statement")
+                new_comms.append(
+                    {
+                        "Date": format_date(meeting_timestamp),
+                        "Release Date": format_date(meeting_timestamp),
+                        "Type": "Statement",
+                        "Text": communication,
+                    }
+                )
 
     minutes_div = row.find(tag_has_minutes)
     if minutes_div:
         all_minutes_links = minutes_div.find_all("a")
-        if all_minutes_links:
-            html_minute_link = [
-                link for link in all_minutes_links if link.text == "HTML"
-            ][0]
+        html_minute_link = next(
+            (link for link in all_minutes_links if link.text == "HTML"), None
+        )
+        if html_minute_link:
             minute_url = BASE_URL + html_minute_link.get("href")
             # Since meetings are released after the meeting, let's get their release date
             minutes_texts = [x.strip() for x in minutes_div.text.split("\n")]
-            minutes_date = [x for x in minutes_texts if x.startswith("(Released")][0]
-            minutes_date = minutes_date.split("(Released")[-1].replace(")", "")
+            minutes_date_text = next(
+                (x for x in minutes_texts if x.startswith("(Released")), None
+            )
+            if not minutes_date_text:
+                return
+            minutes_date = minutes_date_text.split("(Released")[-1].replace(")", "")
             minutes_timestamp = parser.parse(minutes_date)
 
             if minutes_timestamp > most_recent_date:
                 minute_page = fetch_page(minute_url, HEADERS)
-                communication = parse_communication_page(minute_page, "Minute")
-
-                new_comms.append(
-                    {
-                        "Date": format_date(meeting_timestamp),
-                        "Release Date": format_date(minutes_timestamp),
-                        "Type": "Minute",
-                        "Text": communication,
-                    }
-                )
+                if minute_page:
+                    communication = parse_communication_page(minute_page, "Minute")
+                    new_comms.append(
+                        {
+                            "Date": format_date(meeting_timestamp),
+                            "Release Date": format_date(minutes_timestamp),
+                            "Type": "Minute",
+                            "Text": communication,
+                        }
+                    )
 
 
 def update_communications(new_comms):
