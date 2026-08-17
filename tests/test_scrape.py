@@ -145,6 +145,15 @@ def test_real_csv_survives_a_no_op_merge():
     assert content(merged) == content(original)
 
 
+def test_real_csv_release_dates_are_complete_and_sane():
+    """Every published row carries a release date, and no document is released
+    before the meeting it minutes. The 29 conference-call rows that once had a
+    blank release date were backfilled from the shared minutes document."""
+    df = pd.read_csv(REAL_CSV)
+    assert df["Release Date"].isna().sum() == 0
+    assert (pd.to_datetime(df["Release Date"]) >= pd.to_datetime(df["Date"])).all()
+
+
 def test_watermark_tracks_communications_not_schedule(tmp_path, monkeypatch):
     """The watermark drives which pages get fetched next run. It must advance
     on a new communication and hold still on a schedule-only run."""
