@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <!-- Mirrors the structure scrape.py relies on: panel-heading holds the year,
+       each meeting is a "row fomc-meeting..." div with __month / __date, and
+       Statement:/Minutes: blocks carry an "HTML" anchor. -->
+  <div class="panel panel-default">
+    <div class="panel-heading">2026 FOMC Meetings</div>
+
+    <!-- Past meeting with a released statement -->
+    <div class="row fomc-meeting">
+      <div class="fomc-meeting__month">January</div>
+      <div class="fomc-meeting__date">27-28</div>
+      <div class="fomc-meeting__statement">
+        Statement:
+        <a href="/newsevents/pressreleases/monetary20260128a.htm">HTML</a>
+        <a href="/monetarypolicy/files/monetary20260128a1.pdf">PDF</a>
+      </div>
+      <div class="fomc-meeting__minutes">
+        Minutes:
+        <a href="/monetarypolicy/fomcminutes20260128.htm">HTML</a>
+        (Released February 18, 2026)
+      </div>
+    </div>
+
+    <!-- Future meeting: date only, no statement/minutes yet -->
+    <div class="row fomc-meeting">
+      <div class="fomc-meeting__month">September</div>
+      <div class="fomc-meeting__date">16-17</div>
+    </div>
+
+    <!-- Future meeting whose month spans two calendars (e.g. "Oct/Nov") -->
+    <div class="row fomc-meeting">
+      <div class="fomc-meeting__month">Oct/Nov</div>
+      <div class="fomc-meeting__date">3-4</div>
+    </div>
+  </div>
+</body>
+</html>
