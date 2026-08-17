@@ -1,4 +1,5 @@
 import re
+from datetime import date
 
 import pandas as pd
 import requests
@@ -143,31 +144,73 @@ def process_meeting_row(row, meeting_timestamp, most_recent_date, new_comms):
                     )
 
 
-def update_communications(new_comms):
-    new_comms_df = pd.DataFrame(new_comms)
+def scrape_meeting_dates(panels, today=None):
+    # Only upcoming meetings are recorded as "Scheduled Meeting"; past calendar
+    # entries without content (e.g. notation votes) are left out so a scheduled
+    # row always means an upcoming meeting.
+    today_str = format_date(today or date.today())
+    meeting_dates = []
+    for panel in panels:
+        year = extract_year_from_panel(panel)
+        for row in panel.select('div[class*="row fomc-meeting"]'):
+            meeting_timestamp = assemble_meeting_timestamp(row, year)
+            meeting_date = format_date(meeting_timestamp)
+            if meeting_date >= today_str:
+                meeting_dates.append(meeting_date)
+    return meeting_dates
 
-    # Armed with new data, overwrite the existing .csv
-    if not new_comms_df.empty:
-        communications = pd.read_csv("communications.csv")
 
-        communications = (
-            pd.concat([new_comms_df, communications])
-            .assign(Date=lambda df: pd.to_datetime(df["Date"]))
-            .assign(
-                ReleaseDate=lambda df: pd.to_datetime(
-                    df["Release Date"], format="mixed"
-                )
-            )
-            .drop(columns=["Release Date"])
-            .rename(columns={"ReleaseDate": "Release Date"})
-            .sort_values("Date", ascending=False)
-            .drop_duplicates()
-            .reset_index(drop=True)[["Date", "Release Date", "Type", "Text"]]
+def merge_communications(new_comms, communications, meeting_dates):
+    """Reconcile newly scraped communications and scheduled meeting dates with
+    the existing dataset.
+
+    Scheduled meetings are added as their own row type, and a "Scheduled Meeting"
+    row is dropped once a Statement or Minute exists for the same date. Returns
+    the reconciled DataFrame; performs no I/O.
+    """
+    columns = ["Date", "Release Date", "Type", "Text"]
+    new_comms_df = pd.DataFrame(new_comms, columns=columns)
+    scheduled_df = pd.DataFrame(
+        [
+            {"Date": date, "Release Date": date, "Type": "Scheduled Meeting", "Text": ""}
+            for date in meeting_dates
+        ],
+        columns=columns,
+    )
+
+    combined = (
+        pd.concat([new_comms_df, communications, scheduled_df])
+        .assign(Date=lambda df: pd.to_datetime(df["Date"]))
+        .assign(
+            ReleaseDate=lambda df: pd.to_datetime(df["Release Date"], format="mixed")
         )
+        .drop(columns=["Release Date"])
+        .rename(columns={"ReleaseDate": "Release Date"})
+    )
 
-        communications.to_csv("communications.csv", index=False)
+    # A scheduled meeting is superseded once real content exists for that date
+    real_dates = combined.loc[combined["Type"].isin(["Statement", "Minute"]), "Date"]
+    superseded = (combined["Type"] == "Scheduled Meeting") & combined["Date"].isin(
+        real_dates
+    )
 
-        # And overwrite most recent communication date
+    return (
+        combined[~superseded]
+        .sort_values("Date", ascending=False)
+        .drop_duplicates(subset=["Date", "Type"], keep="first")
+        .reset_index(drop=True)[columns]
+    )
+
+
+def update_communications(new_comms, meeting_dates):
+    communications = pd.read_csv("communications.csv")
+    reconciled = merge_communications(new_comms, communications, meeting_dates)
+    reconciled.to_csv("communications.csv", index=False)
+
+    # Only advance the watermark when actual communications were scraped;
+    # scheduled meetings alone should not move it.
+    new_comms_df = pd.DataFrame(new_comms)
+    if not new_comms_df.empty:
         write_most_recent_date(
             "most-recent-communication-date.txt", new_comms_df["Release Date"].max()
         )
@@ -179,8 +222,8 @@ def main():
     if html_content:
         panels = parse_fomc_page(html_content)
         new_comms = scrape_communications(panels, most_recent_date)
-        if new_comms:
-            update_communications(new_comms)
+        meeting_dates = scrape_meeting_dates(panels)
+        update_communications(new_comms, meeting_dates)
 
 
 if __name__ == "__main__":
